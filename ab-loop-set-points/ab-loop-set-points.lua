@@ -24,6 +24,7 @@ local options = {
   toggle_seek_back = true,
   toggle_seek_forward = false,
   console_message = false,
+  point_a_offset = -0.2, -- human reaction time
 }
 
 read_options(options, 'ab_loop_set_points')
@@ -47,6 +48,11 @@ end
 --- @param point 'a' | 'b'
 local function set_point(point)
   local time_pos = mp.get_property_native('time-pos')
+
+  if point == 'a' then
+    time_pos = time_pos + options.point_a_offset
+  end
+
   mp.set_property_native('ab-loop-' .. point, time_pos)
 
   local sub_point = ({ a = 'start', b = 'end' })[point]

@@ -26,11 +26,12 @@ NOTE: The table below shows values as they appear in the script's source code wr
 
 The following options are available for this script:
 
-| Option | Default value |
-| --- | --- |
-| `toggle_seek_back` | `true` |
-| `toggle_seek_forward` | `false` |
-| `console_message` | `false` |
+| Option | Default value | Description |
+| --- | --- | --- |
+| `toggle_seek_back` | `true` | |
+| `toggle_seek_forward` | `false` | |
+| `console_message` | `false` | |
+| `point_a_offset` | `-0.2` | time added to point A if point is not relative to subtitle |
 
 ## Keybindings
 
