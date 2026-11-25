@@ -33,8 +33,6 @@ local function print_message(msg)
   mp.osd_message(msg)
 end
 
---
-
 local function timecode_from_seconds(t)
   if t == 'no' then return t end
   local s_ms = t % 60
@@ -46,35 +44,24 @@ local function timecode_from_seconds(t)
   return string.format('%02d:%02d:%02d.%03d', h, m, s, ms)
 end
 
-mp.add_key_binding(
-  ':', 'ab-loop-set-a',
-  function()
-    local time_pos = mp.get_property_native('time-pos')
-    mp.set_property_native('ab-loop-a', time_pos)
-    print_message(
-      'A/B loop start: ' ..
-      timecode_from_seconds(time_pos) .. ' - ' ..
-      timecode_from_seconds(mp.get_property_native('ab-loop-b'))
-    )
-  end
-)
+--- @param point 'a' | 'b'
+local function set_point(point)
+  local time_pos = mp.get_property_native('time-pos')
+  mp.set_property_native('ab-loop-' .. point, time_pos)
 
-mp.add_key_binding(
-  '"', 'ab-loop-set-b',
-  function()
-    local time_pos = mp.get_property_native('time-pos')
-    mp.set_property_native('ab-loop-b', time_pos)
-    print_message(
-      'A/B loop end: ' ..
-      timecode_from_seconds(mp.get_property_native('ab-loop-a')) .. ' - ' ..
-      timecode_from_seconds(time_pos)
-    )
-  end
-)
+  local sub_point = ({ a = 'start', b = 'end' })[point]
+  print_message(
+    'A/B loop ' .. sub_point .. ': ' ..
+    timecode_from_seconds(time_pos)
+  )
+end
 
---- @param point 'start' | 'end'
-local function get_sub_point(point)
-  local sub_point = mp.get_property_native('sub-' .. point)
+mp.add_key_binding(':', 'ab-loop-set-a', function() set_point('a') end)
+mp.add_key_binding('"', 'ab-loop-set-b', function() set_point('b') end)
+
+--- @param sub_point 'start' | 'end'
+local function get_sub_point(sub_point)
+  local sub_point = mp.get_property_native('sub-' .. sub_point)
   if sub_point then
     local sub_delay = mp.get_property_native('sub-delay')
     return sub_point + sub_delay
@@ -92,7 +79,7 @@ mp.add_key_binding(
       mp.set_property_native('ab-loop-b', sub_end)
       print_message(
         'A/B loop: ' ..
-        timecode_from_seconds(sub_start) .. ' - ' .. timecode_from_seconds(sub_end) .. ' (current subtitle)' 
+        timecode_from_seconds(sub_start) .. ' - ' .. timecode_from_seconds(sub_end) .. ' (current subtitle)'
       )
     else
       print_message(
@@ -114,10 +101,7 @@ mp.add_key_binding(
         timecode_from_seconds(sub_start) .. ' (current subtitle start)'
       )
     else
-      print_message(
-        'Subtitle timecodes not available: ' ..
-        tostring(sub_start) .. ' --> ' .. tostring(sub_end)
-      )
+      set_point('a')
     end
   end
 )
@@ -133,10 +117,7 @@ mp.add_key_binding(
         timecode_from_seconds(sub_end) .. ' (current subtitle end)'
       )
     else
-      print_message(
-        'Subtitle timecodes not available: ' ..
-        tostring(sub_start) .. ' --> ' .. tostring(sub_end)
-      )
+      set_point('b')
     end
   end
 )
@@ -163,7 +144,7 @@ mp.add_key_binding(
 
 mp.add_key_binding(
   'L', 'ab-loop-toggle',
-  function() 
+  function()
     local ab_loop_count = mp.get_property_native('ab-loop-count')
     local ab_loop_a = mp.get_property_native('ab-loop-a')
     local ab_loop_b = mp.get_property_native('ab-loop-b')
@@ -180,7 +161,7 @@ mp.add_key_binding(
     end
     if ab_loop_count == 0 then
       mp.command('no-osd set ab-loop-count inf')
-      if loop_points_status == 'set' then 
+      if loop_points_status == 'set' then
         print_message('A/B loop on')
       else
         print_message('A/B loop on (' .. loop_points_status .. ')')
